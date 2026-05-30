@@ -116,7 +116,7 @@ local Library do
         ["Comma"]             = ",",
         ["Minus"]             = "-",
         ["Period"]            = ".",
-        ["Slash"]             = "`",
+        ["Slash"]             = "/",
         ["Three"]             = "3",
         ["Seven"]             = "7",
         ["Eight"]             = "8",
@@ -1849,7 +1849,7 @@ local Library do
 
             local Window = {
                 Name = Data.Name or Data.name or "Window",
-                SubTitle = Data.SubTitle or Data.subtitle or "for PUBG",
+                SubTitle = Data.SubTitle or Data.subtitle or "By Paladin (vcred64 discord)",
                 ExpiresIn = Data.ExpiresIn or Data.expiresin or "23d",
                 
                 Pages = { },
