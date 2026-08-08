@@ -1850,7 +1850,7 @@ local Library do
             local Window = {
                 Name = Data.Name or Data.name or "Window",
                 SubTitle = Data.SubTitle or Data.subtitle or "Ui by vcred64 discord",
-                ExpiresIn = Data.ExpiresIn or Data.expiresin or "23d",
+                ExpiresIn = Data.ExpiresIn or Data.expiresin or "inf",
                 
                 Pages = { },
                 Items = { },
