@@ -3799,6 +3799,9 @@ local Library do
 Library.CreateSettingsPage = function(self, Window, Options)
     Options = Options or {}
     local configFolder = Options.ConfigFolder or Library.Folders.Configs
+	if not isfolder(configFolder) then
+    makefolder(configFolder)
+	end
     local extraTabs = Options.ExtraTabs or {}
 
     local SettingsPage = Window:Page({Name = "Settings", Icon = "72732892493295"})
