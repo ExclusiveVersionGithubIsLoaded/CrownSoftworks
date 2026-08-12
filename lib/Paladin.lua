@@ -3796,157 +3796,185 @@ local Library do
         end
     end
 
-    Library.CreateSettingsPage = function(self, Window)
-        local SettingsPage = Window:Page({Name = "Settings", Icon = "72732892493295"}) do 
-            local ConfigsSubPage = SettingsPage:SubPage({Name = "Configs"})
-            local ThemingSubPage = SettingsPage:SubPage({Name = "Theming"})
-            local SettingsSubPage = SettingsPage:SubPage({Name = "Settings"})
+Library.CreateSettingsPage = function(self, Window, Options)
+    Options = Options or {}
+    local configFolder = Options.ConfigFolder or Library.Folders.Configs
+    local extraTabs = Options.ExtraTabs or {}
 
-            do -- Configs
-                local ConfigsSection = ConfigsSubPage:Section({Name = "Configs", Side = 1, Icon = "97491613646216"})
+    local SettingsPage = Window:Page({Name = "Settings", Icon = "72732892493295"})
 
-                local ConfigName = ""
-                local ConfigSelected
+    -- === Основные подстраницы ===
+    local ConfigsSubPage = SettingsPage:SubPage({Name = "Configs"})
+    local ThemingSubPage = SettingsPage:SubPage({Name = "Theming"})
+    local SettingsSubPage = SettingsPage:SubPage({Name = "Settings"})
 
-                local ConfigsList = ConfigsSection:Dropdown({
-                    Name = "Configs", 
-                    Flag = "ConfigsList", 
-                    Items = { }, 
-                    Multi = false,
-                    Callback = function(Value)
-                        ConfigSelected = Value
-                    end
-                })
+    -- === Раздел конфигов (используем переданную папку) ===
+    do
+        local ConfigsSection = ConfigsSubPage:Section({Name = "Configs", Side = 1, Icon = "97491613646216"})
 
-                ConfigsSection:Textbox({ 
-                    Default = "", 
-                    Flag = "ConfigName", 
-                    Placeholder = "Config name", 
-                    Callback = function(Value)
-                        ConfigName = Value
-                    end
-                })
+        local ConfigName = ""
+        local ConfigSelected = nil
 
-                ConfigsSection:Button({
-                    Name = "Create",
-                    Callback = function()
-                    if ConfigName and ConfigName ~= "" then
-                        if not isfile(Library.Folders.Configs .. "/" .. ConfigName .. ".json") then
-                            writefile(Library.Folders.Configs .. "/" .. ConfigName .. ".json", Library:GetConfig())
-                            Library:RefreshConfigsList(ConfigsList)
-                        else
-                            return
-                        end
-                    end
-                end})
-
-                ConfigsSection:Button({
-                    Name = "Delete", 
-                    Callback = function()
-                    if ConfigSelected then
-                        Library:DeleteConfig(ConfigSelected)
-                        Library:RefreshConfigsList(ConfigsList)
-                    end
-                end})
-
-                ConfigsSection:Button({
-                    Name = "Load", 
-                    Callback = function()
-                    if ConfigSelected then
-                        Library:LoadConfig(readfile(Library.Folders.Configs .. "/" .. ConfigSelected))
-                    end
-                end})
-
-                ConfigsSection:Button({
-                    Name = "Save", 
-                    Callback = function()
-                    if ConfigName and ConfigName ~= "" then
-                        writefile(Library.Folders.Configs .. "/" .. ConfigName .. ".json", Library:GetConfig())
-                        Library:RefreshConfigsList(ConfigsList)
-                    end
-                end})
-
-                ConfigsSection:Button({
-                    Name = "Refresh", 
-                    Callback = function()
-                    Library:RefreshConfigsList(ConfigsList)
-                end})
-
-                Library:RefreshConfigsList(ConfigsList)               
+        local ConfigsList = ConfigsSection:Dropdown({
+            Name = "Configs",
+            Flag = "ConfigsList",
+            Items = {},
+            Multi = false,
+            Callback = function(Value)
+                ConfigSelected = Value
             end
+        })
 
-            do -- Theming
-                local ThemingSection = ThemingSubPage:Section({Name = "Theming", Icon = "131595494666590", Side = 1})
-                for Index, Value in Library.Theme do 
-                    ThemingSection:Label(Index):Colorpicker({
-                        Flag = Index.."Theme",
-                        Default = Value,
-                        Callback = function(Value)
-                            Library.Theme[Index] = Value
-                            Library:ChangeTheme(Index, Value)
-                        end
-                    })
+        ConfigsSection:Textbox({
+            Default = "",
+            Flag = "ConfigName",
+            Placeholder = "Config name",
+            Callback = function(Value)
+                ConfigName = Value
+            end
+        })
+
+        -- Функция для обновления списка (используем переданную папку)
+        local function RefreshConfigsList()
+            local List = {}
+            for _, file in ipairs(listfiles(configFolder)) do
+                local name = file:match("([^/\\]+)%.json$")
+                if name then
+                    table.insert(List, name)
                 end
             end
+            ConfigsList:Refresh(List)
+        end
 
-            do -- Settings
-                local SettingsSection = SettingsSubPage:Section({Name = "Settings", Icon = "72732892493295", Side = 1})     
-                
-                SettingsSection:Button({
-                    Name = "Unload",
-                    Callback = function()
-                        Library:Unload()
+        ConfigsSection:Button({
+            Name = "Create",
+            Callback = function()
+                if ConfigName and ConfigName ~= "" then
+                    local path = configFolder .. "/" .. ConfigName .. ".json"
+                    if not isfile(path) then
+                        writefile(path, Library:GetConfig())
+                        RefreshConfigsList()
                     end
-                })
-                
-                SettingsSection:Label("Menu Keybind"):Keybind({
-                    Name = "Menu Keybind",
-                    Flag = "MenuKeybind",
-                    Default = Library.MenuKeybind,
-                    Mode = "Toggle",
-                    Callback = function()
-                        Library.MenuKeybind = Library.Flags["MenuKeybind"].Key
-                    end
-                })
-
-                SettingsSection:Slider({
-                    Name = "Tween Speed",
-                    Default = 0.3,
-                    Flag = "Tween Speed",
-                    Decimals = 0.01,
-                    Suffix = "s",
-                    Max = 10,
-                    Min = 0,
-                    Callback = function(Value)
-                        Library.Tween.Time = Value
-                    end
-                })
-
-                SettingsSection:Dropdown({
-                    Name = "Tween Style",
-                    Flag = "Tween style",
-                    Items = { "Linear", "Quad", "Quart", "Back", "Bounce", "Circular", "Cubic", "Elastic", "Exponential", "Sine", "Quint" },
-                    Default = "Quart",
-                    Callback = function(Value)
-                        if not Value then Value = "Quint" end
-                        Library.Tween.Style = Enum.EasingStyle[Value]
-                    end
-                })
-
-                SettingsSection:Dropdown({
-                    Name = "Tween Direction",
-                    Flag = "Tween direction",
-                    Items = { "In", "Out", "InOut" },
-                    Default = "Out",
-                    Callback = function(Value)
-                        if not Value then Value = "Out" end
-                        Library.Tween.Direction = Enum.EasingDirection[Value]
-                    end
-                })
+                end
             end
+        })
+
+        ConfigsSection:Button({
+            Name = "Delete",
+            Callback = function()
+                if ConfigSelected then
+                    delfile(configFolder .. "/" .. ConfigSelected)
+                    RefreshConfigsList()
+                end
+            end
+        })
+
+        ConfigsSection:Button({
+            Name = "Load",
+            Callback = function()
+                if ConfigSelected then
+                    local content = readfile(configFolder .. "/" .. ConfigSelected)
+                    Library:LoadConfig(content)
+                end
+            end
+        })
+
+        ConfigsSection:Button({
+            Name = "Save",
+            Callback = function()
+                if ConfigName and ConfigName ~= "" then
+                    writefile(configFolder .. "/" .. ConfigName .. ".json", Library:GetConfig())
+                    RefreshConfigsList()
+                end
+            end
+        })
+
+        ConfigsSection:Button({
+            Name = "Refresh",
+            Callback = RefreshConfigsList
+        })
+
+        RefreshConfigsList()
+    end
+
+    -- === Раздел тем ===
+    do
+        local ThemingSection = ThemingSubPage:Section({Name = "Theming", Icon = "131595494666590", Side = 1})
+        for key, value in pairs(Library.Theme) do
+            ThemingSection:Label(key):Colorpicker({
+                Flag = key .. "Theme",
+                Default = value,
+                Callback = function(newColor)
+                    Library.Theme[key] = newColor
+                    Library:ChangeTheme(key, newColor)
+                end
+            })
         end
     end
-end
 
+    -- === Раздел настроек ===
+    do
+        local SettingsSection = SettingsSubPage:Section({Name = "Settings", Icon = "72732892493295", Side = 1})
+
+        SettingsSection:Button({
+            Name = "Unload",
+            Callback = function()
+                Library:Unload()
+            end
+        })
+
+        SettingsSection:Label("Menu Keybind"):Keybind({
+            Name = "Menu Keybind",
+            Flag = "MenuKeybind",
+            Default = Library.MenuKeybind,
+            Mode = "Toggle",
+            Callback = function()
+                Library.MenuKeybind = Library.Flags["MenuKeybind"].Key
+            end
+        })
+
+        SettingsSection:Slider({
+            Name = "Tween Speed",
+            Default = 0.3,
+            Flag = "Tween Speed",
+            Decimals = 0.01,
+            Suffix = "s",
+            Max = 10,
+            Min = 0,
+            Callback = function(Value)
+                Library.Tween.Time = Value
+            end
+        })
+
+        SettingsSection:Dropdown({
+            Name = "Tween Style",
+            Flag = "Tween style",
+            Items = {"Linear", "Quad", "Quart", "Back", "Bounce", "Circular", "Cubic", "Elastic", "Exponential", "Sine", "Quint"},
+            Default = "Quart",
+            Callback = function(Value)
+                if not Value then Value = "Quint" end
+                Library.Tween.Style = Enum.EasingStyle[Value]
+            end
+        })
+
+        SettingsSection:Dropdown({
+            Name = "Tween Direction",
+            Flag = "Tween direction",
+            Items = {"In", "Out", "InOut"},
+            Default = "Out",
+            Callback = function(Value)
+                if not Value then Value = "Out" end
+                Library.Tween.Direction = Enum.EasingDirection[Value]
+            end
+        })
+    end
+
+    -- === Добавляем кастомные вкладки (подстраницы) ===
+    for _, tabCreator in ipairs(extraTabs) do
+        tabCreator(SettingsPage)
+    end
+
+    return SettingsPage
+end
 getgenv().Library = Library
 return Library
