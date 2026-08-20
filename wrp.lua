@@ -8,8 +8,8 @@
 -- CONFIG
 ------------------------------------------------------------
 
-local WRAPPER_URL = "YOUR_WRAPPER_RAW_URL_HERE"
-local PAYLOAD_URL = "YOUR_LURAPH_RAW_URL_HERE"
+local WRAPPER_URL = "https://raw.githubusercontent.com/ExclusiveVersionGithubIsLoaded/CrownSoftworks/refs/heads/main/wrp.lua"
+local PAYLOAD_URL = "https://raw.githubusercontent.com/ExclusiveVersionGithubIsLoaded/CrownSoftworks/refs/heads/main/drbf.lua"
 
 ------------------------------------------------------------
 -- SERVICES
